@@ -48,18 +48,13 @@ jobs:
     - name: Debug - Show jacocoTestReport.xml content
       run: cat build/reports/jacoco/test/jacocoTestReport.xml
 
-    - name: Calculate Test Coverage
+    - name: Check for 100% Test Coverage
       run: |
-        covered=$(xmllint --xpath 'sum(//counter[@type="LINE"]/@covered)' build/reports/jacoco/test/jacocoTestReport.xml)
-        total=$(xmllint --xpath 'sum(//counter[@type="LINE"]/@covered + //counter[@type="LINE"]/@missed)' build/reports/jacoco/test/jacocoTestReport.xml)
-        coverage=$(echo "scale=2; $covered / $total" | bc)
-        echo "Overall Coverage: $coverage"
-        required_coverage=0.90
-        comparison=$(echo "$coverage >= $required_coverage" | bc -l)
-        echo "Coverage Comparison (1 if true, 0 if false): $comparison"
-        if [ "$comparison" -eq "0" ]; then
-          echo "Code coverage is less than required $required_coverage (actual: $coverage)"
+        if grep -q 'missed="[^0]' build/reports/jacoco/test/jacocoTestReport.xml; then
+          echo "Code coverage is less than 100%"
           exit 1
+        else
+          echo "Code coverage is 100%"
         fi
   
     - name: Package (only for master branch)
