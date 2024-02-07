@@ -48,9 +48,11 @@ jobs:
     - name: Debug - Show jacocoTestReport.xml content
       run: cat build/reports/jacoco/test/jacocoTestReport.xml
 
-    - name: Verify Test Coverage with xmllint
+    - name: Calculate Test Coverage
       run: |
-        coverage=$(xmllint --xpath 'sum(//report/counter[@type="LINE"]/@covered) div sum(//report/counter[@type="LINE"]/@missed + //report/counter[@type="LINE"]/@covered)' build/reports/jacoco/test/jacocoTestReport.xml)
+        covered=$(xmllint --xpath 'sum(//counter[@type="LINE"]/@covered)' build/reports/jacoco/test/jacocoTestReport.xml)
+        total=$(xmllint --xpath 'sum(//counter[@type="LINE"]/@covered + //counter[@type="LINE"]/@missed)' build/reports/jacoco/test/jacocoTestReport.xml)
+        coverage=$(echo "scale=2; $covered / $total" | bc)
         echo "Overall Coverage: $coverage"
         required_coverage=0.90
         comparison=$(echo "$coverage >= $required_coverage" | bc -l)
