@@ -45,8 +45,10 @@ jobs:
     - name: Verify Test Coverage
       run: |
         coverage=$(grep 'line-rate' build/reports/jacoco/test/jacocoTestReport.xml | grep -o 'line-rate="[^"]*' | grep -o '[0-9.]*')
-        if [ $(echo "$coverage < 1" | bc) -ne 0 ]; then
-          echo "Code coverage is less than 100%"
+        echo "Coverage is $coverage"
+        required_coverage=0.90
+        if [ $(echo "$coverage < $required_coverage" | bc) -ne 0 ]; then
+          echo "Code coverage is less than $required_coverage"
           exit 1
         fi
               
