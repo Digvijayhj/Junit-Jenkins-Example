@@ -35,11 +35,12 @@ jobs:
 
     - name: Verify Test Coverage
       run: |
-        if [ $(grep -c 'instructionCounter' build/reports/jacoco/test/html/index.html | grep '100%' -c) -eq 0 ]; then
-          echo "Code coverage is less than 100%"
-          exit 1
-        fi
-
+            coverage=$(grep 'line-rate' build/reports/jacoco/test/jacocoTestReport.xml | grep -o 'line-rate="[^"]*' | grep -o '[0-9.]*')
+            if [ $(echo "$coverage < 1" | bc) -ne 0 ]; then
+              echo "Code coverage is less than 100%"
+              exit 1
+            fi
+            
     - name: Package (only for master branch)
       if: github.ref == 'refs/heads/master'
       run: ./gradlew assemble
