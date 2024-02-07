@@ -33,6 +33,15 @@ jobs:
     - name: Generate Jacoco Test Coverage Report
       run: ./gradlew jacocoTestReport
     
+    - name: List contents of the Jacoco report directory
+      run: ls -al build/reports/jacoco/test/
+    
+    - name: Upload Jacoco Report Directory
+      uses: actions/upload-artifact@v2
+      with:
+        name: Jacoco Report
+        path: build/reports/jacoco/test/
+    
     - name: Verify Test Coverage
       run: |
         coverage=$(grep 'line-rate' build/reports/jacoco/test/jacocoTestReport.xml | grep -o 'line-rate="[^"]*' | grep -o '[0-9.]*')
@@ -40,12 +49,6 @@ jobs:
           echo "Code coverage is less than 100%"
           exit 1
         fi
-    
-    - name: Upload Jacoco Test Coverage Report
-      uses: actions/upload-artifact@v2
-      with:
-        name: Jacoco Test Coverage Report
-        path: build/reports/jacoco/test/jacocoTestReport.xml
               
     - name: Package (only for master branch)
       if: github.ref == 'refs/heads/master'
