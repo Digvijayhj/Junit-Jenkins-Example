@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'groovy'
+}
+
+group = 'edu.csudh.demo1'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Groovy dependency for Spock tests
+    implementation 'org.codehaus.groovy:groovy:3.0.9' // Use a compatible version for Java 17
+
+    // Spock framework dependencies
+    testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0' // Latest version supporting Groovy 3 and compatible with Java 17
+
+    // JUnit 5 dependencies
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.7" // or higher
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// Configure the existing task directly instead of creating a new one
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.9
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
