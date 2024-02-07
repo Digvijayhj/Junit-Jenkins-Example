@@ -29,6 +29,9 @@ jobs:
 
     - name: Test with Gradle
       run: ./gradlew test
+      
+    - name: Install XML processing tools
+      run: sudo apt-get install -y libxml2-utils
 
     - name: Generate Jacoco Test Coverage Report
       run: ./gradlew jacocoTestReport
@@ -41,19 +44,22 @@ jobs:
       with:
         name: Jacoco Report
         path: build/reports/jacoco/test/
-    
-    - name: Verify Test Coverage
+
+    - name: Debug - Show jacocoTestReport.xml content
+      run: cat build/reports/jacoco/test/jacocoTestReport.xml
+
+    - name: Verify Test Coverage with xmllint
       run: |
-        coverage=$(grep 'line-rate' build/reports/jacoco/test/jacocoTestReport.xml | grep -o 'line-rate="[^"]*' | grep -o '[0-9.]*' | awk '{sum+=$1; count++} END {print sum/count}')
+        coverage=$(xmllint --xpath 'sum(//report/counter[@type="LINE"]/@covered) div sum(//report/counter[@type="LINE"]/@missed + //report/counter[@type="LINE"]/@covered)' build/reports/jacoco/test/jacocoTestReport.xml)
         echo "Overall Coverage: $coverage"
         required_coverage=0.90
-        comparison=$(echo "$coverage >= $required_coverage" | bc)
+        comparison=$(echo "$coverage >= $required_coverage" | bc -l)
         echo "Coverage Comparison (1 if true, 0 if false): $comparison"
         if [ "$comparison" -eq "0" ]; then
           echo "Code coverage is less than required $required_coverage (actual: $coverage)"
           exit 1
         fi
-              
+  
     - name: Package (only for master branch)
       if: github.ref == 'refs/heads/master'
       run: ./gradlew assemble
