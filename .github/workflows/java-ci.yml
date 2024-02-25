@@ -33,23 +33,33 @@ jobs:
     - name: Test
       run: ./gradlew test
 
-    - name: Check for 100% Test Coverage
-      run: |
-        if grep -q 'missed="[^0]' build/reports/jacoco/test/jacocoTestReport.xml; then
-          echo "Code coverage is less than 100%"
-          exit 1
-        else
-          echo "Code coverage is 100%"
-        fi
+    - name: Check for Test Coverage
+      run: ./gradlew check
 
     - name: Package
       run: ./gradlew assemble
 
-    - name: Deploy (optional)
-      run: ./gradlew deploy
+    - name: Deploy to My CSUDH Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} # Your csudh.pem content should be here
+      run: |
+        # Install SSH client
+        sudo apt-get update
+        sudo apt-get install -y openssh-client
+        # Start SSH agent
+        eval $(ssh-agent -s)
+        # Create SSH directory and give it the right permissions
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        # Add the SSH private key from the GitHub secrets
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/csudh.pem
+        chmod 600 ~/.ssh/csudh.pem
+        # Use SSH to execute deployment script on EC2
+        ssh -o "StrictHostKeyChecking=no" -i ~/.ssh/csudh.pem ec2-user@54.156.126.16 'bash -s' < deploy_script.sh
+        # Note: deploy_script.sh should be a script that resides in your repository and contains the deployment commands.
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
         name: packaged-jar
-       
+        path: build/libs/*.jar
