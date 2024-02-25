@@ -24,29 +24,14 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build with Gradle
+    - name: Clean
+      run: ./gradlew clean
+
+    - name: Build
       run: ./gradlew build
 
-    - name: Test with Gradle
+    - name: Test
       run: ./gradlew test
-      
-    - name: Install XML processing tools
-      run: sudo apt-get install -y libxml2-utils
-
-    - name: Generate Jacoco Test Coverage Report
-      run: ./gradlew jacocoTestReport
-    
-    - name: List contents of the Jacoco report directory
-      run: ls -al build/reports/jacoco/test/
-    
-    - name: Upload Jacoco Report Directory
-      uses: actions/upload-artifact@v2
-      with:
-        name: Jacoco Report
-        path: build/reports/jacoco/test/
-
-    - name: Debug - Show jacocoTestReport.xml content
-      run: cat build/reports/jacoco/test/jacocoTestReport.xml
 
     - name: Check for 100% Test Coverage
       run: |
@@ -56,13 +41,14 @@ jobs:
         else
           echo "Code coverage is 100%"
         fi
-  
-    - name: Package (only for master branch)
-      if: github.ref == 'refs/heads/master'
+
+    - name: Package
       run: ./gradlew assemble
 
-    - name: Upload Artifacts (only for master branch)
-      if: github.ref == 'refs/heads/master'
+    - name: Deploy (optional)
+      run: ./gradlew deploy
+
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
         name: packaged-jar
