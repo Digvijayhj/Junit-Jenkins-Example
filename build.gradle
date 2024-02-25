@@ -11,23 +11,11 @@ repositories {
 }
 
 dependencies {
-    // Groovy dependency for Spock tests
-    implementation 'org.codehaus.groovy:groovy:3.0.9' // Use a compatible version for Java 17
-
-    // Spock framework dependencies
-    testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0' // Latest version supporting Groovy 3 and compatible with Java 17
-
-    // JUnit 5 dependencies
+    implementation 'org.codehaus.groovy:groovy:3.0.9'
+    testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-
-    // Add the following lines to ensure compatibility with Java 8, 11, 14, and 17
-    constraints {
-        implementation 'org.codehaus.groovy:groovy:3.0.9'
-        testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
-        testImplementation 'org.junit.jupiter:junit-jupiter'
-        compileOnly 'org.projectlombok:lombok'
-    }
+    // other dependencies...
 }
 
 test {
@@ -37,7 +25,7 @@ test {
 apply plugin: 'jacoco'
 
 jacoco {
-    toolVersion = "0.8.7" // or higher
+    toolVersion = "0.8.7"
 }
 
 test {
@@ -51,7 +39,6 @@ jacocoTestReport {
     }
 }
 
-// Configure the existing task directly instead of creating a new one
 jacocoTestCoverageVerification {
     violationRules {
         rule {
@@ -63,3 +50,9 @@ jacocoTestCoverageVerification {
 }
 
 check.dependsOn jacocoTestCoverageVerification
+
+task deploy {
+    doLast {
+        println 'The deploy task is a placeholder and should be executed within a CI/CD pipeline.'
+    }
+}
