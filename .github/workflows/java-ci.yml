@@ -41,23 +41,21 @@ jobs:
 
     - name: Deploy to My CSUDH Server
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} # Your csudh.pem content should be here
-      - name: Deploy to My CSUDH Server
-  env:
-    SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  run: |
-    # Install SSH client
-    sudo apt-get update
-    sudo apt-get install -y openssh-client
-    # Start SSH agent
-    eval $(ssh-agent -s)
-    # Add the SSH private key from the GitHub secrets
-    echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    # Disable host key checking for the initial connection
-    ssh-keyscan 54.156.126.16 >> ~/.ssh/known_hosts
-    # Use SSH to execute the deployment script on the EC2 instance
-    scp -i ~/.ssh/deployment_key deploy_script.sh ec2-user@54.156.126.16:/tmp/
-    ssh -i ~/.ssh/deployment_key ec2-user@54.156.126.16 'bash /tmp/deploy_script.sh'
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        # Install SSH client
+        sudo apt-get update
+        sudo apt-get install -y openssh-client
+        # Start SSH agent
+        eval $(ssh-agent -s)
+        # Create SSH key file from GitHub secrets
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/deployment_key
+        chmod 600 ~/.ssh/deployment_key
+        ssh-keyscan 54.156.126.16 >> ~/.ssh/known_hosts
+        # Copy the deployment script to the server
+        scp -i ~/.ssh/deployment_key deploy_script.sh ec2-user@54.156.126.16:/tmp/
+        # Run the deployment script on the server
+        ssh -i ~/.ssh/deployment_key ec2-user@54.156.126.16 'bash /tmp/deploy_script.sh'
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
