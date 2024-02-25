@@ -20,6 +20,24 @@ dependencies {
     // JUnit 5 dependencies
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // Add the following lines to ensure compatibility with Java 8, 11, 14, and 17
+    constraints {
+        implementation 'org.codehaus.groovy:groovy:3.0.9'
+        testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        compileOnly 'org.projectlombok:lombok'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.7" // or higher
 }
 
 test {
